@@ -17,6 +17,9 @@ my_model = "random_forest.pkl"
 my_etl_model = "housing_etl.pkl"
 
 def main():
+    """
+    Creates inference data in form of npys to be passed to webserver
+    """
     houseETL = HousingETL(housing_url=HOUSING_URL)
     numeric, categorical, housing_X_train, housing_y_train = houseETL.train_numeric_categorical_split()
 

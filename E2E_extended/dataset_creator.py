@@ -223,6 +223,12 @@ class HousingInference(object):
         self.housing_y_train = housing_y_train
 
     def create_inference_dataset(self):
+        directory_finder = DirectoryFinder()
+        gitroot = directory_finder.get_root_path()
+
+        created_prepared_csv = os.path.join(gitroot, "E2E_extended/X_prepared")
+        y_csv = os.path.join(gitroot, "E2E_extended/y")
+
         etl_pipe = joblib.load(self.etl_model)
 
         created_x = self.housing_X_train.iloc[:self.number_of_samples]
@@ -230,7 +236,11 @@ class HousingInference(object):
 
         created_prepared = etl_pipe.transform(created_x)
 
+        np.save(created_prepared_csv, created_x, allow_pickle=True)
+        np.save(y_csv, created_y, allow_pickle=True)
+
         return created_prepared, created_y
+
 
 
 

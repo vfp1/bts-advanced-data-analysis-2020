@@ -2,8 +2,24 @@ import pandas as pd
 from flask import Flask, jsonify, request
 import joblib
 
+import os
+import sys
+
+# Putting Talaria as Package Parent
+PACKAGE_PARENT = '..'
+SCRIPT_DIR = os.path.dirname(os.path.realpath(os.path.join(os.getcwd(), os.path.expanduser(__file__))))
+sys.path.append(os.path.normpath(os.path.join(SCRIPT_DIR, PACKAGE_PARENT)))
+
+from E2E_extended.dataset_creator import DirectoryFinder
+
+# Setting paths
+directory_finder = DirectoryFinder()
+gitroot = directory_finder.get_root_path()
+
+pickle_file = os.path.join(gitroot, "E2E_extended/random_forest.pkl")
+
 # Load our model
-model = joblib.load('random_forest.pkl')
+model = joblib.load(pickle_file)
 
 # Our app
 app = Flask(__name__)
