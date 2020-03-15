@@ -16,7 +16,7 @@ HOUSING_URL = DOWNLOAD_ROOT + "sessions/data/housing.tgz"
 my_model = "random_forest.pkl"
 my_etl_model = "housing_etl.pkl"
 
-if __name__ == '__main__':
+def main():
     houseETL = HousingETL(housing_url=HOUSING_URL)
     numeric, categorical, housing_X_train, housing_y_train = houseETL.train_numeric_categorical_split()
 
@@ -24,4 +24,9 @@ if __name__ == '__main__':
                                      housing_X_train=housing_X_train, housing_y_train=housing_y_train)
     X_transformed, y = houseInferred.create_inference_dataset()
 
-    print(X_transformed, y)
+    return X_transformed, y
+
+if __name__ == '__main__':
+    X_transformed, y = main()
+    print(X_transformed)
+    print(y)
