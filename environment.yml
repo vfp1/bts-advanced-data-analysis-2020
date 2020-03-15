@@ -16,3 +16,4 @@ dependencies:
   - anaconda-navigator
   - flask
   - scikit-learn>=0.22
+  - gitpython

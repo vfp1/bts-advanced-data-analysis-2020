@@ -17,27 +17,41 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.pipeline import Pipeline
 import joblib
 
+import git
+from pathlib import Path
+
+class DirectoryFinder(object):
+
+    def get_root_path(self):
+
+        git_repo = git.Repo(Path(__file__).parent.absolute(), search_parent_directories=True)
+        git_root = git_repo.git.rev_parse("--show-toplevel")
+
+        return git_root
 
 class HousingETL(object):
 
-    def __init__(self, housing_url, housing_path):
+    def __init__(self, housing_url):
         self.housing_url = housing_url
-        self.housing_path = housing_path
 
     def fetch_housing_data(self):
         """
         Downloads data from Github and saves it to local
         :return: None
         """
+        directory_finder = DirectoryFinder()
+        gitroot = directory_finder.get_root_path()
 
-        if not os.path.isdir(self.housing_path):
-            os.makedirs(self.housing_path)
+        housing_path = os.path.join(gitroot, "E2E_extended/housing_data")
 
-        if not os.path.exists(os.path.join(self.housing_path, "housing.csv")):
-            tgz_path = os.path.join(self.housing_path, "housing.tgz")
+        if not os.path.isdir(housing_path):
+            os.makedirs(housing_path)
+
+        if not os.path.exists(os.path.join(housing_path, "housing.csv")):
+            tgz_path = os.path.join(housing_path, "housing.tgz")
             request.urlretrieve(self.housing_url, tgz_path)
             housing_tgz = tarfile.open(tgz_path)
-            housing_tgz.extractall(path=self.housing_path)
+            housing_tgz.extractall(path=housing_path)
             housing_tgz.close()
 
     def load_housing_data(self):
@@ -45,7 +59,12 @@ class HousingETL(object):
         A function to load Housing Pandas DataFrame
         :return: a Pandas DataFrame
         """
-        csv_path = os.path.join(self.housing_path, "housing.csv")
+        directory_finder = DirectoryFinder()
+        gitroot = directory_finder.get_root_path()
+
+        housing_path = os.path.join(gitroot, "E2E_extended/housing_data")
+
+        csv_path = os.path.join(housing_path, "housing.csv")
         return pd.read_csv(csv_path)
 
     def stratified_sampling(self):
@@ -145,6 +164,10 @@ class HousingPipeline(object):
         Returns a dataset to be ingested into an ML algorithm
         :return:
         """
+        directory_finder = DirectoryFinder()
+        gitroot = directory_finder.get_root_path()
+
+        etl_name_path = os.path.join(gitroot, "E2E_extended/{}".format(self.my_etl_name))
 
         num_pipeline = Pipeline([
             ('imputer', SimpleImputer(strategy="median")),
@@ -162,11 +185,17 @@ class HousingPipeline(object):
 
         housing_prepared = full_etl_pipeline.fit_transform(self.X)
 
-        my_etl_model = joblib.dump(full_etl_pipeline, self.my_etl_name, 'wb')
+        my_etl_model = joblib.dump(full_etl_pipeline, etl_name_path)
 
         return housing_prepared, full_etl_pipeline, my_etl_model
 
     def random_forest_pipeline(self):
+
+        directory_finder = DirectoryFinder()
+        gitroot = directory_finder.get_root_path()
+
+        model_name_path = os.path.join(gitroot, "E2E_extended/{}".format(self.my_model_name))
+
         housing_prepared, etl_pipeline, etl_pkl = self.etl_pipeline()
 
         random_forest_pipe = Pipeline([
@@ -181,7 +210,7 @@ class HousingPipeline(object):
 
         random_forest_pipe.fit(self.X, self.y)
 
-        my_model = joblib.dump(random_forest_pipe, self.my_model_name)
+        my_model = joblib.dump(random_forest_pipe, model_name_path)
 
         return my_model, random_forest_pipe
 
