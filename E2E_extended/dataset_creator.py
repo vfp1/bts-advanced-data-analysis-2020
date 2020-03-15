@@ -162,7 +162,7 @@ class HousingPipeline(object):
 
         housing_prepared = full_etl_pipeline.fit_transform(self.X)
 
-        my_etl_model = joblib.dump(full_etl_pipeline, self.my_etl_name)
+        my_etl_model = joblib.dump(full_etl_pipeline, self.my_etl_name, 'wb')
 
         return housing_prepared, full_etl_pipeline, my_etl_model
 
