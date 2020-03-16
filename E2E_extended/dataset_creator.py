@@ -226,8 +226,8 @@ class HousingInference(object):
         directory_finder = DirectoryFinder()
         gitroot = directory_finder.get_root_path()
 
-        created_prepared_csv = os.path.join(gitroot, "E2E_extended/X_prepared")
-        y_csv = os.path.join(gitroot, "E2E_extended/y")
+        created_inference_csv = os.path.join(gitroot, "E2E_extended/X_inference.csv")
+        y_inference_csv = os.path.join(gitroot, "E2E_extended/y_inference.csv")
 
         etl_pipe = joblib.load(self.etl_model)
 
@@ -236,10 +236,10 @@ class HousingInference(object):
 
         created_prepared = etl_pipe.transform(created_x)
 
-        np.save(created_prepared_csv, created_x, allow_pickle=True)
-        np.save(y_csv, created_y, allow_pickle=True)
+        created_x.to_csv(created_inference_csv)
+        created_y.to_csv(y_inference_csv)
 
-        return created_prepared, created_y
+        return created_x, created_prepared, created_y
 
 
 

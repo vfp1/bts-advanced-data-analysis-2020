@@ -1,5 +1,6 @@
 import pandas as pd
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template
+from flask_caching import Cache
 import joblib
 
 import os
@@ -22,27 +23,24 @@ pickle_file = os.path.join(gitroot, "E2E_extended/random_forest.pkl")
 model = joblib.load(pickle_file)
 
 # Our app
-app = Flask(__name__)
+cache = Cache(config={'CACHE_TYPE': 'simple'})
+app = Flask(__name__, template_folder=os.path.join(gitroot, "E2E_extended"))
 
+cache.init_app(app)
 # Our app route
-@app.route('/', methods=['POST'])
+@app.route('/predict', methods=['GET', 'POST'])
+@cache.cached(timeout=50)
 
-def predict():
-    # get data
-    data = request.get_json(force=True)
+def predict(result=None):
+    if request.method == 'POST':
+        df = pd.read_csv(request.files.get('file'))
 
-    # convert data into dataframe
-    data.update((x, [y]) for x, y in data.items())
-    data_df = pd.DataFrame.from_dict(data)
+        results = model.predict(df)
+        print(results)
 
-    # predictions
-    result = model.predict(data_df)
+        return render_template('predict.html', dataset=df, result=results)
 
-    # send back to browser
-    output = {'results': int(result[0])}
-
-    # return data
-    return jsonify(results=output)
+    return render_template('predict.html')
 
 if __name__ == '__main__':
     app.run(port = 5000, debug=True)

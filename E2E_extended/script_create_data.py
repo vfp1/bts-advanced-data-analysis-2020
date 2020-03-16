@@ -25,11 +25,12 @@ def main():
 
     houseInferred = HousingInference(number_of_samples=10, etl_model=my_etl_model,
                                      housing_X_train=housing_X_train, housing_y_train=housing_y_train)
-    X_transformed, y = houseInferred.create_inference_dataset()
+    X, X_transformed, y = houseInferred.create_inference_dataset()
 
-    return X_transformed, y
+    return X, X_transformed, y
 
 if __name__ == '__main__':
-    X_transformed, y = main()
+    X, X_transformed, y = main()
     print(X_transformed)
+    print(X)
     print(y)
